@@ -19,33 +19,32 @@ class BuiltIn:
             self.__driver__.get(temporary_url)
             html = self.__driver__.page_source
             soup = BeautifulSoup(html, "html.parser")
-            company_links = soup.find_all("div", class_="d-flex align-items-center my-sm mt-lg-0")
-            company_sizes = soup.find_all("div", class_="d-inline me-lg-lg")
+            companies_information = soup.find_all("div", class_="col-12 col-lg-9")
 
-            stripped_companies = set()
-            for div in company_links:
-                anchors = div.find_all("a", href=True)
-                for a in anchors:
-                    href = a['href']
-                    if href.startswith("/company/"):
-                        company_slug = href.replace("/company/", "")
-                        stripped_companies.add(company_slug)
+            for info in companies_information:
+                print("--------------------------------------------")
 
-            stripped_companies = list(stripped_companies)
-        
-            stripped_sizes = []
-            for company_size in company_sizes:
-                size = company_size.find("span")
-                if size:
-                    text = size.get_text()
-                    match = re.search(r'[\d,]+', text)
-                    if match:
-                        number = int(match.group(0).replace(',', ''))
-                        stripped_sizes.append(number)
+                company_link_tag = info.find("a", href=True)
+                slug = ""
+                if company_link_tag:
+                    href = company_link_tag['href']
+                    slug = href.split("/company/")[-1]
 
-            for pos in range(0, len(stripped_companies)):
-                self.__all_companies__.append(stripped_companies[pos])
-                self.__company_size__[stripped_companies[pos]] = stripped_sizes[pos]
+                employees_span = info.find("span", string=lambda x: x and "Employees" in x)
+                employees_number = ""
+                if employees_span:
+                    employees_number = employees_span.text.split()[0]  
+
+                location_span = info.find("span", class_="text-gray-03")
+                location_city = ""
+                if location_span:
+                    location_city = location_span.text.strip().split(",")[0]
+
+                print(f"Slug: {slug}")
+                print(f"Employees: {employees_number}")
+                print(f"City: {location_city}")
+
+                print("--------------------------------------------")
 
     @property
     def get_title(self):
