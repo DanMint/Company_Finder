@@ -6,8 +6,8 @@ import re
 
 
 class BuiltIn:
-    def __init__(self, base_url):
-        self.__base_url__ = base_url
+    def __init__(self):
+        self.__base_url__ = "https://builtin.com/companies?country=USA&page="
         self.__final_page_number__ = 2504
         self.__find_last_page_number__()
         self.__driver__ = webdriver.Chrome()
@@ -143,7 +143,7 @@ class BuiltIn:
             f.write(str(self.__soup__))
 
 def main():
-    test = BuiltIn("https://builtin.com/companies?country=USA&page=")
+    test = BuiltIn()
     print("---------------------------------------------------")
     print(test.get_city_to_company_)
     print("---------------------------------------------------")
