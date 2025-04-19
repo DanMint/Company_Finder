@@ -1,20 +1,45 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+import time
 import re
 
 
 class BuiltIn:
     def __init__(self, base_url):
         self.__base_url__ = base_url
+        self.__final_page_number__ = 2504
+        self.__find_last_page_number__()
         self.__driver__ = webdriver.Chrome()
-        self.__all_companies__ = []
-        self.__company_size__ = {}
-        self.__companies_filterd_size__ = {}
-        self.__retreive_all_companies_and_sizes__()
+        self.__companies_names__ = []
+        # These are ranges. 10 means 1-10, 20 means 11-20, 30 means 21-30, etc.
+        self.__size_range__ = [10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000, 7500, 10000]
+        # These are ranges. 10 means 1-10, 20 means 11-20, 30 means 21-30, etc.
+        self.__size_range_to_companies__ = {"None":[], 10:[], 20:[], 30:[], 40:[], 50:[], 75:[], 100:[], 150:[], 200:[], 250:[], 300:[], 400:[], 500:[], 750:[], 1000:[], 1500:[], 2000:[], 2500:[], 3000:[], 3500:[], 4000:[], 5000:[], 7500:[], 10000:[]}
+        self.__city_to_company__ = {}
+        self.__state_to_company__ = {}
+        # key = name of company(str), Value = employees_number, company_field, location_city, location_state, location_country, total_offices
+        self.__company_to_information__ = {}
+        self.__retreive_company_information__()
         
-    def __retreive_all_companies_and_sizes__(self):
-        for page_number in range(500, 501):
+    def __find_last_page_number__(self) -> None:
+        # This function is used to find the last page number of the website
+        # The last page number is used to iterate through the pages of the website
+        # The last page number is found by checking if the last page number is valid
+        # If the last page number is not valid, it will decrement the last page number and check again
+        # This will continue until a valid last page number is found
+        temporary_url = self.__base_url__ + self.__final_page_number__
+        self.__driver__.get(temporary_url)
+        html = self.__driver__.page_source
+        soup = BeautifulSoup(html, "html.parser")
+        last_page_number = soup.find("h2", class_="font-Montserrat fw-extrabold fs-2xl fs-lg-3xl text-midnight text-center mt-3xl mt-lg-4xl")
+        if last_page_number:
+            self.__final_page_number__ -= 1
+            self.__final_page_number__()
+        return 
+
+    def __retreive_company_information__(self):
+        for page_number in range(1, self.__final_page_number__ + 1):
             temporary_url = self.__base_url__ + str(page_number)
             self.__driver__.get(temporary_url)
             html = self.__driver__.page_source
@@ -22,14 +47,18 @@ class BuiltIn:
             companies_information = soup.find_all("div", class_="col-12 col-lg-9")
 
             for info in companies_information:
-                print("--------------------------------------------")
-
                 company_link_tag = info.find("a", href=True)
-                slug = ""
+                company_name = ""
                 if company_link_tag:
                     href = company_link_tag['href']
-                    slug = href.split("/company/")[-1]
+                    company_name = href.split("/company/")[-1]
 
+                company_field_div = info.find("div", class_="font-barlow fw-medium text-gray-04 mb-sm")
+                company_field = ""
+                if company_field_div:
+                    company_field = company_field_div.get_text(strip=True)
+                
+                    
                 employees_span = info.find("span", string=lambda x: x and "Employees" in x)
                 employees_number = ""
                 if employees_span:
@@ -37,27 +66,77 @@ class BuiltIn:
 
                 location_span = info.find("span", class_="text-gray-03")
                 location_city = ""
+                location_state = ""
+                location_country = ""
+                total_offices = ""
                 if location_span:
-                    location_city = location_span.text.strip().split(",")[0]
+                    location = location_span.text.strip().split(",")
+                    if len(location) == 1:
+                        location_city = "Many locations"
+                        location_state = "Many locations"
+                        location_country = "Many locations"
+                        total_offices = location[0]
+                    elif location[0] == "Fully Remote":
+                            location_city = "Fully Remote"
+                            location_state = "Fully Remote"
+                            location_country = location[1]
+                            total_offices = "1 office"
+                    else:
+                        location_city = location[0]
+                        location_state = location[1]
+                        location_country = location[2]
+                        total_offices = "1 office"
 
-                print(f"Slug: {slug}")
-                print(f"Employees: {employees_number}")
-                print(f"City: {location_city}")
+                self.__companies_names__.append(company_name)
+                self.__company_to_information__[company_name] = [employees_number, company_field, location_city, location_state, location_country, total_offices]
 
-                print("--------------------------------------------")
+                if location_state in self.__state_to_company__:
+                    self.__state_to_company__[location_state].append(company_name)
+                else:
+                    self.__state_to_company__[location_state] = [company_name]
+
+                if location_city in self.__city_to_company__:
+                    self.__city_to_company__[location_city].append(company_name)
+                else:
+                    self.__city_to_company__[location_city] = [company_name]
+                
+                self.__put_company_to_range(company_name, employees_number)
+
+            time.sleep(3)
+
+    def __put_company_to_range(self, company_name, employees_number) -> None:
+        if not employees_number:
+            self.__size_range_to_companies__["None"].append(company_name)
+            return
+        temp = int(employees_number.replace(",", ""))
+        closest_number = min(self.__size_range__, key=lambda x: abs(x - temp))
+        self.__size_range_to_companies__[closest_number].append(company_name)
+
 
     @property
     def get_title(self):
         return self.__driver__.title
     
     @property
-    def get_all_companies(self):
-        return self.__all_companies__
+    def get_companies_names_(self):
+        return self.__companies_names__
     
     @property
-    def get_all_companies_with_size(self):
-        return self.__all_companies__
-
+    def get_company_to_information_(self):
+        return self.__company_to_information__
+    
+    @property
+    def get_state_to_company_(self):
+        return self.__state_to_company__
+    
+    @property
+    def get_city_to_company_(self):
+        return self.__city_to_company__
+    
+    @property
+    def get_size_range_to_companies_(self):
+        return self.__size_range_to_companies__
+    
     @property
     def html_into_txt_debugging(self):
         with open("src/scraping/debugging/BuiltInBoston_soup_output.txt", "w", encoding="utf-8") as f:
@@ -65,8 +144,19 @@ class BuiltIn:
 
 def main():
     test = BuiltIn("https://builtin.com/companies?country=USA&page=")
-    test.get_all_companies_with_size
-    # test.html_into_txt_debugging()
+    print("---------------------------------------------------")
+    print(test.get_city_to_company_)
+    print("---------------------------------------------------")
+    print(test.get_state_to_company_)
+    print("---------------------------------------------------")
+    print(test.get_size_range_to_companies_)
+    print("---------------------------------------------------")
+    print(test.get_company_to_information_)
+    print("---------------------------------------------------")
+    print(test.get_companies_names_)
+    print("---------------------------------------------------")
+
+
 
 if __name__ == "__main__":
     main()
