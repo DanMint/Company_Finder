@@ -6,11 +6,11 @@ import re
 
 
 class BuiltIn:
-    def __init__(self):
+    def __init__(self, final_page_number=2504):
         self.__base_url__ = "https://builtin.com/companies?country=USA&page="
-        self.__final_page_number__ = 2504
-        self.__find_last_page_number__()
         self.__driver__ = webdriver.Chrome()
+        self.__final_page_number__ = final_page_number
+        self.__find_last_page_number__()
         self.__companies_names__ = []
         # These are ranges. 10 means 1-10, 20 means 11-20, 30 means 21-30, etc.
         self.__size_range__ = [10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000, 7500, 10000]
@@ -28,7 +28,7 @@ class BuiltIn:
         # The last page number is found by checking if the last page number is valid
         # If the last page number is not valid, it will decrement the last page number and check again
         # This will continue until a valid last page number is found
-        temporary_url = self.__base_url__ + self.__final_page_number__
+        temporary_url = self.__base_url__ + str(self.__final_page_number__)
         self.__driver__.get(temporary_url)
         html = self.__driver__.page_source
         soup = BeautifulSoup(html, "html.parser")
@@ -38,11 +38,14 @@ class BuiltIn:
             self.__final_page_number__()
         return 
 
+    def __retrieve_page_html__(self, page_number) -> str:
+        temporary_url = self.__base_url__ + str(page_number)
+        self.__driver__.get(temporary_url)
+        return self.__driver__.page_source
+
     def __retreive_company_information__(self):
         for page_number in range(1, self.__final_page_number__ + 1):
-            temporary_url = self.__base_url__ + str(page_number)
-            self.__driver__.get(temporary_url)
-            html = self.__driver__.page_source
+            html = self.__retrieve_page_html__(page_number)
             soup = BeautifulSoup(html, "html.parser")
             companies_information = soup.find_all("div", class_="col-12 col-lg-9")
 
@@ -87,6 +90,10 @@ class BuiltIn:
                         location_country = location[2]
                         total_offices = "1 office"
 
+                location_state = location_state.strip()  
+                location_city = location_city.strip()
+                location_country = location_country.strip()
+
                 self.__companies_names__.append(company_name)
                 self.__company_to_information__[company_name] = [employees_number, company_field, location_city, location_state, location_country, total_offices]
 
@@ -102,7 +109,7 @@ class BuiltIn:
                 
                 self.__put_company_to_range(company_name, employees_number)
 
-            time.sleep(3)
+            time.sleep(1)
 
     def __put_company_to_range(self, company_name, employees_number) -> None:
         if not employees_number:

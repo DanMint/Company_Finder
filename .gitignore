@@ -1,1 +1,6 @@
 myenv/*
+.pytest_cache/*
+src/__pycache__/*
+src/scraping/__pycache__/
+unit_tests/__pycache__/
+./temp.py

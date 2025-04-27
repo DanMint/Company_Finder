@@ -1,0 +1,27 @@
+name: Run when Build In scrape or its testing gets changed
+
+on:
+  push:
+    paths:
+      - src/scraping/builtInScrape.py
+      - unit_tests/test_builtInScrape.py
+
+jobs:
+  run-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          make install
+
+      - name: Run test
+        run: |
+          make test
