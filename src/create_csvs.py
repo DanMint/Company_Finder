@@ -2,7 +2,8 @@ import csv
 from scraping import builtInScrape
 
 class CsvCreationForBuiltIn:
-    def __init__(self):
+    def __init__(self, amount_of_pages):
+        self.__amount_of_pages__ = amount_of_pages
         self.__company_names__ = None
         self.__size_range_to_companies__ = None
         self.__city_to_company__ = None
@@ -20,7 +21,7 @@ class CsvCreationForBuiltIn:
         self.__csv_size_range_to_companies__()
 
     def __populate_information__(self):
-        new_scrape = builtInScrape.BuiltIn()
+        new_scrape = builtInScrape.BuiltIn(self.__amount_of_pages__)
         self.__company_names__ = new_scrape.get_companies_names_
         self.__size_range_to_companies__ = new_scrape.get_size_range_to_companies_
         self.__state_to_company__ = new_scrape.get_state_to_company_
@@ -77,7 +78,8 @@ class CsvCreationForBuiltIn:
 
     
 def main():
-    temp = CsvCreationForBuiltIn()
+    amount_of_pages = input("Enter amount of pages")
+    temp = CsvCreationForBuiltIn(int(amount_of_pages))
 
 if __name__ == "__main__":
     main()
