@@ -1,6 +1,8 @@
 install:
-	pip install --upgrade pip
-	pip install -r requirements.txt
+	./run_scripts/env_creation.sh
 
-test:
-	python3 -m unittest unit_tests/test_builtInScrape.py
+test: install
+	./run_scripts/test.sh
+
+run:
+	./run_scripts/run.sh

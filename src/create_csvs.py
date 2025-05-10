@@ -1,5 +1,6 @@
 import csv
 from scraping import builtInScrape
+import os
 
 class CsvCreationForBuiltIn:
     def __init__(self, amount_of_pages):
@@ -13,12 +14,18 @@ class CsvCreationForBuiltIn:
         self.driver_functon()
 
     def driver_functon(self):
+        self.__check_and_create_csv_folder__()
         self.__populate_information__()
         self.__csv_state_to_company__()
         self.__csv_city_to_company__()
         self.__csv_company_names__()
         self.__csv_company_to_information__()
         self.__csv_size_range_to_companies__()
+
+    def __check_and_create_csv_folder__(self):
+        folder_name = "csv_data_files"
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
     def __populate_information__(self):
         new_scrape = builtInScrape.BuiltIn(self.__amount_of_pages__)
