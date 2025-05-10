@@ -5,11 +5,9 @@ from src.scraping.builtInScrape import BuiltIn
 
 class TestBuiltInScrape(unittest.TestCase):
     @patch("src.scraping.builtInScrape.webdriver.Chrome")
-    @patch("src.scraping.builtInScrape.BuiltIn.__find_last_page_number__")
     @patch("src.scraping.builtInScrape.BuiltIn.__retrieve_page_html__")
-    def test_retreive_company_information(self, mock_retrival, find_last_page_number, mock_chrome):
+    def test_retreive_company_information(self, mock_retrival, mock_chrome):
         mock_chrome.return_value = MagicMock()
-        find_last_page_number.return_value = None
         with open("unit_tests/files_for_tests/BuiltInBoston_soup_output.txt", "r") as file:
             mock_retrival.return_value = file.read()
 

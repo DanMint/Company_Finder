@@ -5,14 +5,12 @@ import time
 import re
 import random
 
-
-
 class BuiltIn:
-    def __init__(self, final_page_number=2504):
+    def __init__(self, scrape_page_amonunt):
+        self.__scrape_page_amonunt__ = scrape_page_amonunt
+        self.__final_page_number__ = 2504
         self.__base_url__ = "https://builtin.com/companies?country=USA&page="
         self.__driver__ = webdriver.Chrome()
-        self.__final_page_number__ = final_page_number
-        self.__find_last_page_number__()
         self.__companies_names__ = []
         # These are ranges. 10 means 1-10, 20 means 11-20, 30 means 21-30, etc.
         self.__size_range__ = [10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000, 7500, 10000]
@@ -24,21 +22,16 @@ class BuiltIn:
         self.__company_to_information__ = {}
         self.__retreive_company_information__()
         
-    def __find_last_page_number__(self) -> None:
-        # This function is used to find the last page number of the website
-        # The last page number is used to iterate through the pages of the website
-        # The last page number is found by checking if the last page number is valid
-        # If the last page number is not valid, it will decrement the last page number and check again
-        # This will continue until a valid last page number is found
-        temporary_url = self.__base_url__ + str(self.__final_page_number__)
-        self.__driver__.get(temporary_url)
-        html = self.__driver__.page_source
-        soup = BeautifulSoup(html, "html.parser")
-        last_page_number = soup.find("h2", class_="font-Montserrat fw-extrabold fs-2xl fs-lg-3xl text-midnight text-center mt-3xl mt-lg-4xl")
-        if last_page_number:
-            self.__final_page_number__ -= 1
-            self.__final_page_number__()
-        return 
+    def __get_random_pages__(self) -> list:
+        page_numbers = []
+        for _ in range(self.__scrape_page_amonunt__):
+            random_page_number = random.randint(1, self.__final_page_number__)
+            while random_page_number in page_numbers:
+                random_page_number = random.randint(1, self.__final_page_number__)
+
+            page_numbers.append(random_page_number)
+        
+        return page_numbers
 
     def __retrieve_page_html__(self, page_number) -> str:
         temporary_url = self.__base_url__ + str(page_number)
@@ -46,8 +39,8 @@ class BuiltIn:
         return self.__driver__.page_source
 
     def __retreive_company_information__(self):
-        pages = list(range(1, self.__final_page_number__ + 1))
-        random.shuffle(pages)  # Randomize page access order to avoid detection
+        pages = self.__get_random_pages__()
+
         # self.__final_page_number__ + 1
         for idx, page_number in enumerate(pages, 1):
             if idx % 100 == 0:
@@ -122,7 +115,6 @@ class BuiltIn:
         closest_number = min(self.__size_range__, key=lambda x: abs(x - temp))
         self.__size_range_to_companies__[closest_number].append(company_name)
 
-
     @property
     def get_title(self):
         return self.__driver__.title
@@ -153,7 +145,7 @@ class BuiltIn:
             f.write(str(self.__soup__))
 
 def main():
-    test = BuiltIn()
+    test = BuiltIn(5)
     print("---------------------------------------------------")
     print(test.get_city_to_company_)
     print("---------------------------------------------------")
