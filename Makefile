@@ -4,5 +4,5 @@ install:
 test: install
 	./run_scripts/test.sh
 
-run:
+run: install
 	./run_scripts/run.sh
