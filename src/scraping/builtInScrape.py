@@ -24,7 +24,7 @@ class BuiltIn:
         
     def __get_random_pages__(self) -> list:
         page_numbers = []
-        for page in range(self.__scrape_page_amonunt__):
+        for _ in range(self.__scrape_page_amonunt__):
             random_page_number = random.randint(1, self.__final_page_number__)
             while random_page_number in page_numbers:
                 random_page_number = random.randint(1, self.__final_page_number__)
