@@ -4,5 +4,7 @@ src/__pycache__/*
 src/scraping/__pycache__/
 unit_tests/__pycache__/
 ./temp.py
-infra/.terraform/
+csv_data_files
+infra/.terraform
 infra/.terraform.lock.hcl
+

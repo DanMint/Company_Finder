@@ -18,7 +18,7 @@ class BuiltIn:
         self.__size_range_to_companies__ = {"None":[], 10:[], 20:[], 30:[], 40:[], 50:[], 75:[], 100:[], 150:[], 200:[], 250:[], 300:[], 400:[], 500:[], 750:[], 1000:[], 1500:[], 2000:[], 2500:[], 3000:[], 3500:[], 4000:[], 5000:[], 7500:[], 10000:[]}
         self.__city_to_company__ = {}
         self.__state_to_company__ = {}
-        # key = name of company(str), Value = employees_number, company_field, location_city, location_state, location_country, total_offices
+        # key = name of company(str), Value = employees_number, company_field, location_city, location_state, total_offices
         self.__company_to_information__ = {}
         self.__retreive_company_information__()
         
@@ -40,7 +40,7 @@ class BuiltIn:
 
     def __retreive_company_information__(self):
         pages = self.__get_random_pages__()
-        random.shuffle(pages)  # Randomize page access order to avoid detection
+
         # self.__final_page_number__ + 1
         for idx, page_number in enumerate(pages, 1):
             if idx % 100 == 0:
@@ -71,32 +71,27 @@ class BuiltIn:
                 location_span = info.find("span", class_="text-gray-03")
                 location_city = ""
                 location_state = ""
-                location_country = ""
                 total_offices = ""
                 if location_span:
                     location = location_span.text.strip().split(",")
                     if len(location) == 1:
                         location_city = "Many locations"
                         location_state = "Many locations"
-                        location_country = "Many locations"
                         total_offices = location[0]
                     elif location[0] == "Fully Remote":
                             location_city = "Fully Remote"
                             location_state = "Fully Remote"
-                            location_country = location[1]
                             total_offices = "1 office"
                     else:
                         location_city = location[0]
                         location_state = location[1]
-                        location_country = location[2]
                         total_offices = "1 office"
 
                 location_state = location_state.strip()  
                 location_city = location_city.strip()
-                location_country = location_country.strip()
 
                 self.__companies_names__.append(company_name)
-                self.__company_to_information__[company_name] = [employees_number, company_field, location_city, location_state, location_country, total_offices]
+                self.__company_to_information__[company_name] = [employees_number, company_field, location_city, location_state, total_offices]
 
                 if location_state in self.__state_to_company__:
                     self.__state_to_company__[location_state].append(company_name)
@@ -110,7 +105,7 @@ class BuiltIn:
                 
                 self.__put_company_to_range(company_name, employees_number)
 
-            time.sleep(1)
+            time.sleep(random.uniform(5,10))
 
     def __put_company_to_range(self, company_name, employees_number) -> None:
         if not employees_number:
