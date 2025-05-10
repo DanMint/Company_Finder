@@ -1,6 +1,6 @@
 # Company Finder
 
-This project is a small web scraping project that scrapes websites to find different companies, their company size, their field, location, etc. The idea of this project is to get acquainted with all the different companies out there. It's always interesting to know and see what different companies are out there in the wild.
+This project is a small web scraping project that scrapes websites to find different companies, their company size, their field, location, etc. The idea of this project is to get acquainted with all the different companies out there in the wild.
 
 ## Important
 
